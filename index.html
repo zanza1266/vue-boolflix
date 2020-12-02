@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- FONT AWESOME 5.5.0 -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+
+    <!-- MEDIA QUERY -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- BOOTSTRAP 4 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- VUE -->
+    <script src="vue/vue.js" charset="utf-8"></script>
+
+    <!-- AXIOS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"></script>
+
+    <!-- MY FUNCTIONS -->
+    <script src="js/functions.js" charset="utf-8"></script>
+
+    <title></title>
+  </head>
+
+  <body>
+    <div id="root">
+
+      <div class="container">
+        <div class="row">
+          <div class="d-flex">
+            <input type="text" v-model="userSearch">
+            <button class="btn btn-default" type="submit" @click="search">Search</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col d-flex flex-wrap justify-content-around">
+            <div class="card" style="width: 18rem;" v-for="film in filmsInPage">
+              <div class="card-body">
+                <h5 class="card-title">{{film.title}}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{film.original_title}}</h6>
+                <p class="card-text">{{film.original_language}}</p>
+                <p class="card-text">{{film.vote_average}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class=" col d-flex justify-content-center">
+            <div class="select-page">
+              <div class="btn-group mr-2" role="group" aria-label="First group">
+                <!-- <button type="button" class="btn btn-secondary">1</button>
+                <button type="button" class="btn btn-secondary">2</button>
+                <button type="button" class="btn btn-secondary">3</button>
+                <button type="button" class="btn btn-secondary">4</button> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script src="js/main.js" charset="utf-8"></script>
+  </body>
+</html>
