@@ -40,27 +40,32 @@
 
         <div class="row">
           <div class="col d-flex flex-wrap justify-content-around">
-            <div class="card" style="width: 18rem;" v-for="film in filmsInPage">
-              <div class="card-body">
-                <h5 class="card-title">{{film.title}}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{film.original_title}}</h6>
-                <p class="card-text">{{film.original_language}}</p>
-                <p class="card-text">{{film.vote_average}}</p>
+
+            <div class="my-card d-flex flex-column" v-for="film in filmsInPage">
+              <h5>{{film.title}}</h5>
+              <h6>{{film.original_title}}</h6>
+              <p>{{film.original_language}}</p>
+              <img :src="flag(film)" alt="">
+              <div class="stars">
+                <span v-for="(star, index) in 5">
+                  <i class="fas fa-star" :class="index + 1 <= starRate(film) ? 'yellow' : 'grey'"></i>
+                </span>
               </div>
+
             </div>
+
           </div>
         </div>
 
         <div class="row">
           <div class=" col d-flex justify-content-center">
-            <div class="select-page">
-              <div class="btn-group mr-2" role="group" aria-label="First group">
-                <!-- <button type="button" class="btn btn-secondary">1</button>
-                <button type="button" class="btn btn-secondary">2</button>
-                <button type="button" class="btn btn-secondary">3</button>
-                <button type="button" class="btn btn-secondary">4</button> -->
-              </div>
+
+            <div class="pagination">
+              <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchPrevious">&laquo;</a>
+              <a href="#" v-for="(number, index) in displayedNav" @click="changePage(number, index)">{{number}}</a>
+              <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchFollowing">&raquo;</a>
             </div>
+
           </div>
         </div>
       </div>
