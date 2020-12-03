@@ -5,6 +5,7 @@
 const vm = new Vue ({
   el: '#root',
   data: {
+    category: 'film',
     userSearch: '',
     actualSearch: '',
     filmsInPage: [],
@@ -74,86 +75,97 @@ const vm = new Vue ({
       // inizializzo la pagina da visualizzare ad 1 prima che si avvii la chiamata.
       this.selectedPage = 1;
 
-      axios.get('https://api.themoviedb.org/3/search/movie', {
-        params: {
-          api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
-          query: this.userSearch,
-          page: this.page
-        }
-      })
-      .then((res) => {
-        console.log(res);
-        // popolo l'array di film da visualizzare nella pagina selezionata
-        this.filmsInPage = res.data.results
-
-        // svuoto array delle pagine totali della ricerca e l'array delle pagine selezionabili nella navigation bar (funzionale principalmente in caso di nuova ricerca)
-        this.arrayOfTotPages = [];
-        this.displayedNav = [];
-
-        // popolo array delle pagine totali
-        for (let i = 1; i <= res.data.total_pages; i++) {
-          this.arrayOfTotPages.push(i)
-        }
-
-        // popolo array delle pagine selezionabili
-        this.arrayOfTotPages.forEach(n => {
-          if (n <= 10) {
-            this.displayedNav.push(n)
+      // gestisco la chiamata se categoria è film
+      if (this.category == 'film') {
+        axios.get('https://api.themoviedb.org/3/search/movie', {
+          params: {
+            api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+            query: this.userSearch,
+            page: 1
           }
         })
-      });
+        .then((res) => {
+          console.log(res);
+
+          this.manageDataOnSearch(res)
+        });
+      }
+      // gestisco la chiamata se categoria è serie
+      if (this.category == 'serie') {
+        axios.get('https://api.themoviedb.org/3/search/tv', {
+          params: {
+            api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+            query: this.userSearch,
+            page: 1
+          }
+        })
+        .then((res) => {
+          console.log(res);
+
+          this.manageDataOnSearch(res)
+        })
+      }
+
+    },
+
+    manageDataOnSearch: function (callResult) {
+      // popolo l'array di film da visualizzare nella pagina selezionata
+      this.filmsInPage = callResult.data.results
+
+      // svuoto array delle pagine totali della ricerca e l'array delle pagine selezionabili nella navigation bar (funzionale principalmente in caso di nuova ricerca)
+      this.arrayOfTotPages = [];
+      this.displayedNav = [];
+
+      // popolo array delle pagine totali
+      for (let i = 1; i <= callResult.data.total_pages; i++) {
+        this.arrayOfTotPages.push(i)
+      }
+
+      // popolo array delle pagine selezionabili
+      this.arrayOfTotPages.forEach(n => {
+        if (n <= 10) {
+          this.displayedNav.push(n)
+        }
+      })
+    },
+
+    manageDataOnPageSwitch: function (callResult) {
+      // popolo l'array di film da visualizzare nella pagina selezionata
+      this.filmsInPage = callResult.data.results
+
+      // svuoto array delle pagine totali della ricerca e l'array delle pagine selezionabili nella navigation bar (funzionale principalmente in caso di nuova ricerca)
+      this.arrayOfTotPages = [];
+      this.displayedNav = [];
+
+      // popolo array delle pagine totali
+      for (let i = 1; i <= callResult.data.total_pages; i++) {
+        this.arrayOfTotPages.push(i)
+      }
+
+
+      // logica per ripopolare reattivamente l'array delle pagine selezionabili in base alla pagina verso la quale l'utente si è spostato (dalla pagina 6 in poi, sono visualizzabili sempre le 5 pagine successive e le 4 precedenti rispetto alla pagina selezionata)
+      if (this.selectedPage <= 5) {
+        this.arrayOfTotPages.forEach(n => {
+          if (n <= 10) {
+            this.displayedNav.push(n);
+          }
+        })
+      } else if (this.selectedPage > 5) {
+
+        this.arrayOfTotPages.forEach(n => {
+          if ((n >= (this.selectedPage-4)) && (n <= (this.selectedPage+5))) {
+            this.displayedNav.push(n);
+          }
+        })
+      }
     },
 
     changePage: function (num, index) {
       // aggiorno il numero di pagina selezionato in {data}
       this.selectedPage = num;
 
-      axios.get('https://api.themoviedb.org/3/search/movie', {
-        params: {
-          api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
-          query: this.actualSearch,
-          page: this.selectedPage
-        }
-      })
-      .then((res) => {
-        console.log(res);
-        // popolo l'array di film da visualizzare nella pagina selezionata
-        this.filmsInPage = res.data.results
-
-        // svuoto array delle pagine totali della ricerca e l'array delle pagine selezionabili nella navigation bar (funzionale principalmente in caso di nuova ricerca)
-        this.arrayOfTotPages = [];
-        this.displayedNav = [];
-
-        // popolo array delle pagine totali
-        for (let i = 1; i <= res.data.total_pages; i++) {
-          this.arrayOfTotPages.push(i)
-        }
-
-
-        // logica per ripopolare reattivamente l'array delle pagine selezionabili in base alla pagina verso la quale l'utente si è spostato (dalla pagina 6 in poi, sono visualizzabili sempre le 5 pagine successive e le 4 precedenti rispetto alla pagina selezionata)
-        if (this.selectedPage <= 5) {
-          this.arrayOfTotPages.forEach(n => {
-            if (n <= 10) {
-              this.displayedNav.push(n);
-            }
-          })
-        } else if (this.selectedPage > 5) {
-
-          this.arrayOfTotPages.forEach(n => {
-            if ((n >= (this.selectedPage-4)) && (n <= (this.selectedPage+5))) {
-              this.displayedNav.push(n);
-            }
-          })
-        }
-      });
-    },
-
-    switchFollowing: function () {
-
-      // logica per avanzare di pagina con la freccia di destra
-      if (this.selectedPage < this.arrayOfTotPages.length) {
-        this.selectedPage += 1
-
+      // gestisco la chiamata se categoria è film
+      if (this.category == 'film') {
         axios.get('https://api.themoviedb.org/3/search/movie', {
           params: {
             api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -163,30 +175,65 @@ const vm = new Vue ({
         })
         .then((res) => {
           console.log(res);
-          this.filmsInPage = res.data.results
 
-          this.arrayOfTotPages = [];
-          this.displayedNav = [];
-
-          for (let i = 1; i <= res.data.total_pages; i++) {
-            this.arrayOfTotPages.push(i)
-          }
-
-          if (this.selectedPage <= 5) {
-            this.arrayOfTotPages.forEach(n => {
-              if (n <= 10) {
-                this.displayedNav.push(n)
-              }
-            })
-          } else if (this.selectedPage > 5) {
-
-            this.arrayOfTotPages.forEach(n => {
-              if ((n >= (this.selectedPage-4)) && (n <= (this.selectedPage+5))) {
-                this.displayedNav.push(n)
-              }
-            })
-          }
+          this.manageDataOnPageSwitch(res)
         });
+      }
+      
+      // gestisco la chiamata se categoria è serie
+      if (this.category == 'serie') {
+        axios.get('https://api.themoviedb.org/3/search/tv', {
+          params: {
+            api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+            query: this.actualSearch,
+            page: this.selectedPage
+          }
+        })
+        .then((res) => {
+          console.log(res);
+
+          this.manageDataOnPageSwitch(res)
+        });
+      }
+    },
+
+    switchFollowing: function () {
+
+      // logica per avanzare di pagina con la freccia di destra
+      if (this.selectedPage < this.arrayOfTotPages.length) {
+        this.selectedPage += 1;
+
+        // gestisco la chiamata se categoria è film
+        if (this.category == 'film') {
+          axios.get('https://api.themoviedb.org/3/search/movie', {
+            params: {
+              api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+              query: this.actualSearch,
+              page: this.selectedPage
+            }
+          })
+          .then((res) => {
+            console.log(res);
+
+            this.manageDataOnPageSwitch(res)
+          });
+        }
+
+        // gestisco la chiamata se categoria è serie
+        if (this.category == 'serie') {
+          axios.get('https://api.themoviedb.org/3/search/tv', {
+            params: {
+              api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+              query: this.actualSearch,
+              page: this.selectedPage
+            }
+          })
+          .then((res) => {
+            console.log(res);
+
+            this.manageDataOnPageSwitch(res)
+          });
+        }
       }
     },
 
@@ -194,41 +241,39 @@ const vm = new Vue ({
 
       // logica per retrocedere di pagina con la freccia di sinistra
       if (this.selectedPage > 1) {
-        this.selectedPage -= 1
+        this.selectedPage -= 1;
 
-        axios.get('https://api.themoviedb.org/3/search/movie', {
-          params: {
-            api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
-            query: this.actualSearch,
-            page: this.selectedPage
-          }
-        })
-        .then((res) => {
-          console.log(res);
-          this.filmsInPage = res.data.results
+        // gestisco la chiamata se categoria è film
+        if (this.category == 'film') {
+          axios.get('https://api.themoviedb.org/3/search/movie', {
+            params: {
+              api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+              query: this.actualSearch,
+              page: this.selectedPage
+            }
+          })
+          .then((res) => {
+            console.log(res);
 
-          this.arrayOfTotPages = [];
-          this.displayedNav = [];
+            this.manageDataOnPageSwitch(res)
+          });
+        }
 
-          for (let i = 1; i <= res.data.total_pages; i++) {
-            this.arrayOfTotPages.push(i)
-          }
+        // gestisco la chiamata se categoria è serie
+        if (this.category == 'serie') {
+          axios.get('https://api.themoviedb.org/3/search/tv', {
+            params: {
+              api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+              query: this.actualSearch,
+              page: this.selectedPage
+            }
+          })
+          .then((res) => {
+            console.log(res);
 
-          if (this.selectedPage <= 5) {
-            this.arrayOfTotPages.forEach(n => {
-              if (n <= 10) {
-                this.displayedNav.push(n)
-              }
-            })
-          } else if (this.selectedPage > 5) {
-
-            this.arrayOfTotPages.forEach(n => {
-              if ((n >= (this.selectedPage-4)) && (n <= (this.selectedPage+5))) {
-                this.displayedNav.push(n)
-              }
-            })
-          }
-        });
+            this.manageDataOnPageSwitch(res)
+          });
+        }
       }
     },
 

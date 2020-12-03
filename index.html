@@ -33,6 +33,13 @@
       <div class="container">
         <div class="row">
           <div class="d-flex">
+
+            <span>seleziona una categoria</span>
+            <select class="" v-model="category">
+              <option value="film">Film</option>
+              <option value="serie">Serie TV</option>
+            </select>
+
             <input type="text" v-model="userSearch">
             <button class="btn btn-default" type="submit" @click="search">Search</button>
           </div>
@@ -42,8 +49,12 @@
           <div class="col d-flex flex-wrap justify-content-around">
 
             <div class="my-card d-flex flex-column" v-for="film in filmsInPage">
-              <h5>{{film.title}}</h5>
-              <h6>{{film.original_title}}</h6>
+              <h5 v-if="category == 'film'">{{film.title}}</h5>
+              <h5 v-else>{{film.name}}</h5>
+
+              <h6 v-if="category == 'film'">{{film.original_title}}</h6>
+              <h6 v-else>{{film.original_name}}</h6>
+
               <p>{{film.original_language}}</p>
               <img :src="flag(film)" alt="">
               <div class="stars">
