@@ -6,6 +6,8 @@ const vm = new Vue ({
   el: '#root',
   data: {
     category: 'film',
+    currentCategory: '',
+
     userSearch: '',
     actualSearch: '',
     filmsInPage: [],
@@ -68,15 +70,20 @@ const vm = new Vue ({
 
     search: function () {
 
-      // salvo la stringa di ricerca in una proprietà di {data} così da mantenerla statica, e riferirla alle query che si attivano quando eventualmente l'utente cambia pagina dalla pagination bar (in caso venga digitato qualcosa di diverso nella barra di ricerca, il cambio di pagina dei film farà riferimento sempre alla stringa di ricerca originaria).
+      // salvo la stringa di 'data.userSearch' in una proprietà di {data} così da mantenerla statica, e riferirla alle query che si attivano quando eventualmente l'utente cambia pagina dalla pagination bar (in caso venga digitato qualcosa di diverso nella barra di ricerca, il cambio di pagina dei film farà riferimento sempre alla stringa di ricerca originaria).
       let searched = this.userSearch;
       this.actualSearch = searched;
+
+      // replico l'operazione fatta con 'data.userSearch' per salvare 'data.category'.
+      let selectedCategory = this.category;
+      this.currentCategory = selectedCategory;
+
 
       // inizializzo la pagina da visualizzare ad 1 prima che si avvii la chiamata.
       this.selectedPage = 1;
 
       // gestisco la chiamata se categoria è film
-      if (this.category == 'film') {
+      if (this.currentCategory == 'film') {
         axios.get('https://api.themoviedb.org/3/search/movie', {
           params: {
             api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -91,7 +98,7 @@ const vm = new Vue ({
         });
       }
       // gestisco la chiamata se categoria è serie
-      if (this.category == 'serie') {
+      if (this.currentCategory == 'serie') {
         axios.get('https://api.themoviedb.org/3/search/tv', {
           params: {
             api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -161,11 +168,13 @@ const vm = new Vue ({
     },
 
     changePage: function (num, index) {
+      console.log(event);
+      console.log(num);
       // aggiorno il numero di pagina selezionato in {data}
       this.selectedPage = num;
 
       // gestisco la chiamata se categoria è film
-      if (this.category == 'film') {
+      if (this.currentCategory == 'film') {
         axios.get('https://api.themoviedb.org/3/search/movie', {
           params: {
             api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -179,9 +188,9 @@ const vm = new Vue ({
           this.manageDataOnPageSwitch(res)
         });
       }
-      
+
       // gestisco la chiamata se categoria è serie
-      if (this.category == 'serie') {
+      if (this.currentCategory == 'serie') {
         axios.get('https://api.themoviedb.org/3/search/tv', {
           params: {
             api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -204,7 +213,7 @@ const vm = new Vue ({
         this.selectedPage += 1;
 
         // gestisco la chiamata se categoria è film
-        if (this.category == 'film') {
+        if (this.currentCategory == 'film') {
           axios.get('https://api.themoviedb.org/3/search/movie', {
             params: {
               api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -220,7 +229,7 @@ const vm = new Vue ({
         }
 
         // gestisco la chiamata se categoria è serie
-        if (this.category == 'serie') {
+        if (this.currentCategory == 'serie') {
           axios.get('https://api.themoviedb.org/3/search/tv', {
             params: {
               api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -244,7 +253,7 @@ const vm = new Vue ({
         this.selectedPage -= 1;
 
         // gestisco la chiamata se categoria è film
-        if (this.category == 'film') {
+        if (this.currentCategory == 'film') {
           axios.get('https://api.themoviedb.org/3/search/movie', {
             params: {
               api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -260,7 +269,7 @@ const vm = new Vue ({
         }
 
         // gestisco la chiamata se categoria è serie
-        if (this.category == 'serie') {
+        if (this.currentCategory == 'serie') {
           axios.get('https://api.themoviedb.org/3/search/tv', {
             params: {
               api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
@@ -293,6 +302,7 @@ const vm = new Vue ({
         }
       })
       return match;
-    }
+    },
+
   }
 })

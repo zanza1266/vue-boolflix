@@ -3,6 +3,9 @@
   <head>
     <meta charset="utf-8">
 
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 
@@ -13,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- BOOTSTRAP 4 -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
 
     <!-- VUE -->
     <script src="vue/vue.js" charset="utf-8"></script>
@@ -30,55 +33,66 @@
   <body>
     <div id="root">
 
-      <div class="container">
-        <div class="row">
-          <div class="d-flex">
-
-            <span>seleziona una categoria</span>
-            <select class="" v-model="category">
-              <option value="film">Film</option>
-              <option value="serie">Serie TV</option>
-            </select>
-
-            <input type="text" v-model="userSearch">
-            <button class="btn btn-default" type="submit" @click="search">Search</button>
-          </div>
+      <header class="flex-row jfy-between alg-center">
+        <div class="logo">
+          <img src="img/logo2.png" alt="">
         </div>
 
-        <div class="row">
-          <div class="col d-flex flex-wrap justify-content-around">
+        <div class="search-header flex-row jfy-between">
+          <span class="f-size-12">seleziona una categoria</span>
+          <select class="mg-lt-10" v-model="category">
+            <option value="film">Film</option>
+            <option value="serie">Serie TV</option>
+          </select>
 
-            <div class="my-card d-flex flex-column" v-for="film in filmsInPage">
-              <h5 v-if="category == 'film'">{{film.title}}</h5>
-              <h5 v-else>{{film.name}}</h5>
+          <input class="mg-lt-20" type="text" placeholder="Cerca" v-model="userSearch">
+          <button class="mg-lt-20" @click="search"><i class="fas fa-search"></i></button>
+        </div>
 
-              <h6 v-if="category == 'film'">{{film.original_title}}</h6>
-              <h6 v-else>{{film.original_name}}</h6>
+      </header>
 
-              <p>{{film.original_language}}</p>
-              <img :src="flag(film)" alt="">
+      <div class="container">
+
+        <div class="cards-container flex-row wrap">
+          <div class="my-card" v-for="film in filmsInPage">
+
+            <div class="poster">
+              <img :src="`https://image.tmdb.org/t/p/original/${film.poster_path}`" alt="poster">
+            </div>
+
+            <div class="flex-col film-info">
+              <h1 v-if="currentCategory == 'film'">{{film.title}}</h1>
+              <h1 v-else>{{film.name}}</h1>
+              <h2 v-if="currentCategory == 'film'">{{film.original_title}}</h2>
+              <h2 v-else>{{film.original_name}}</h2>
+
+              <span class="label">Lingua:</span>
+              <img class="flag" :src="flag(film)" alt="">
+
+              <span class="label">Voto:</span>
               <div class="stars">
                 <span v-for="(star, index) in 5">
                   <i class="fas fa-star" :class="index + 1 <= starRate(film) ? 'yellow' : 'grey'"></i>
                 </span>
               </div>
 
+              <span class="label">Overview:</span>
+              <p>{{film.overview}}</p>
             </div>
 
           </div>
         </div>
 
-        <div class="row">
-          <div class=" col d-flex justify-content-center">
+        <div class="pagination-row flex-row alg-center jfy-center">
+          <div class="pagination">
+            <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchPrevious">&laquo;</a>
 
-            <div class="pagination">
-              <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchPrevious">&laquo;</a>
-              <a href="#" v-for="(number, index) in displayedNav" @click="changePage(number, index)">{{number}}</a>
-              <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchFollowing">&raquo;</a>
-            </div>
+            <a href="#" v-for="(number, index) in displayedNav" @click="changePage(number, index)">{{number}}</a>
 
+            <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchFollowing">&raquo;</a>
           </div>
         </div>
+
       </div>
     </div>
 
