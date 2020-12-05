@@ -54,30 +54,60 @@
       <div class="container">
 
         <div class="cards-container flex-row wrap">
-          <div class="my-card" v-for="film in filmsInPage">
+          <div class="my-card" v-for="(film, index) in filmsInPage">
 
             <div class="poster">
-              <img :src="`https://image.tmdb.org/t/p/original/${film.poster_path}`" alt="poster">
+              <!-- da mostrare se poster non presente -->
+              <div v-if="film.poster_path == null" class="img-not-available flex-col alg-center jfy-center">
+                <h2 v-if="currentCategory == 'film'" class="text-center">{{film.title}}</h2>
+                <h2 v-else>{{film.name}}</h2>
+                <img src="img/logo2.png" alt="logo">
+              </div>
+
+              <img v-else :src="`https://image.tmdb.org/t/p/original/${film.poster_path}`" alt="poster">
             </div>
 
             <div class="flex-col film-info">
+              <!-- titolo -->
               <h1 v-if="currentCategory == 'film'">{{film.title}}</h1>
               <h1 v-else>{{film.name}}</h1>
-              <h2 v-if="currentCategory == 'film'">{{film.original_title}}</h2>
-              <h2 v-else>{{film.original_name}}</h2>
 
-              <span class="label">Lingua:</span>
-              <img class="flag" :src="flag(film)" alt="">
-
-              <span class="label">Voto:</span>
-              <div class="stars">
-                <span v-for="(star, index) in 5">
-                  <i class="fas fa-star" :class="index + 1 <= starRate(film) ? 'yellow' : 'grey'"></i>
-                </span>
+              <div v-if="currentCategory == 'film'" :class="{displayNone: film.title == film.original_title}">
+                <span class="f-size-12">Titolo originale:</span>
+                <h2>{{film.original_title}}</h2>
               </div>
 
+              <div v-else :class="{displayNone: film.name == film.original_name}">
+                <span class="f-size-12">Titolo originale:</span>
+                <h2>{{film.original_name}}</h2>
+              </div>
+
+              <!-- lingua -->
+              <span class="label">Lingua:</span>
+              <p v-if="flag(film) == 'notFound'">{{film.original_language}}</p>
+              <img v-else class="flag" :src="flag(film)" alt="flag">
+              <!-- stelle -->
+              <span class="label">Voto:</span>
+              <div class="stars">
+
+                <!-- stella piena -->
+                <span v-for="(star, index) in stars[index].stars">
+                  <i class="fas fa-star yellow"></i>
+                </span>
+                <!-- mezza stella (se presente)-->
+                <span v-for="(half, index) in stars[index].halfStar">
+                  <i class="fas fa-star-half-alt yellow"></i>
+                </span>
+                <!-- stella vuota (se presente) -->
+                <span v-for="(star, index) in 5 - (stars[index].stars + stars[index].halfStar)">
+                  <i class="far fa-star"></i>
+                </span>
+
+              </div>
+              <!-- overview -->
               <span class="label">Overview:</span>
-              <p>{{film.overview}}</p>
+              <p v-if="film.overview == ''">(Overview not available)</p>
+              <p v-else>{{film.overview}}</p>
             </div>
 
           </div>
@@ -87,7 +117,7 @@
           <div class="pagination">
             <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchPrevious">&laquo;</a>
 
-            <a href="#" v-for="(number, index) in displayedNav" @click="changePage(number, index)">{{number}}</a>
+            <a href="#" v-for="(number, index) in displayedNav" :class="{active: number.pos == selectedPage}" @click="changePage(number, index)">{{number.pos}}</a>
 
             <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchFollowing">&raquo;</a>
           </div>

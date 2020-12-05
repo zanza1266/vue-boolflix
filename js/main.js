@@ -7,7 +7,6 @@ const vm = new Vue ({
   data: {
     category: 'film',
     currentCategory: '',
-
     userSearch: '',
     actualSearch: '',
     filmsInPage: [],
@@ -61,10 +60,10 @@ const vm = new Vue ({
         lang: 'sv'
       },
     ],
-
     arrayOfTotPages: [],
     displayedNav: [],
-    selectedPage: null
+    selectedPage: null,
+    stars: []
   },
   methods: {
 
@@ -80,7 +79,7 @@ const vm = new Vue ({
 
 
       // inizializzo la pagina da visualizzare ad 1 prima che si avvii la chiamata.
-      this.selectedPage = 1;
+      this.selectedPage = 1
 
       // gestisco la chiamata se categoria è film
       if (this.currentCategory == 'film') {
@@ -93,7 +92,7 @@ const vm = new Vue ({
         })
         .then((res) => {
           console.log(res);
-
+          this.generateStarsRate(res)
           this.manageDataOnSearch(res)
         });
       }
@@ -108,7 +107,7 @@ const vm = new Vue ({
         })
         .then((res) => {
           console.log(res);
-
+          this.generateStarsRate(res)
           this.manageDataOnSearch(res)
         })
       }
@@ -116,6 +115,7 @@ const vm = new Vue ({
     },
 
     manageDataOnSearch: function (callResult) {
+
       // popolo l'array di film da visualizzare nella pagina selezionata
       this.filmsInPage = callResult.data.results
 
@@ -131,12 +131,13 @@ const vm = new Vue ({
       // popolo array delle pagine selezionabili
       this.arrayOfTotPages.forEach(n => {
         if (n <= 10) {
-          this.displayedNav.push(n)
+          this.displayedNav.push({pos: n, selected: false})
         }
       })
     },
 
     manageDataOnPageSwitch: function (callResult) {
+
       // popolo l'array di film da visualizzare nella pagina selezionata
       this.filmsInPage = callResult.data.results
 
@@ -154,24 +155,25 @@ const vm = new Vue ({
       if (this.selectedPage <= 5) {
         this.arrayOfTotPages.forEach(n => {
           if (n <= 10) {
-            this.displayedNav.push(n);
+            this.displayedNav.push({pos: n, selected: false});
           }
         })
       } else if (this.selectedPage > 5) {
 
         this.arrayOfTotPages.forEach(n => {
           if ((n >= (this.selectedPage-4)) && (n <= (this.selectedPage+5))) {
-            this.displayedNav.push(n);
+            this.displayedNav.push({pos: n, selected: false});
           }
         })
       }
+
     },
 
     changePage: function (num, index) {
-      console.log(event);
+
       console.log(num);
       // aggiorno il numero di pagina selezionato in {data}
-      this.selectedPage = num;
+      this.selectedPage = num.pos;
 
       // gestisco la chiamata se categoria è film
       if (this.currentCategory == 'film') {
@@ -183,10 +185,14 @@ const vm = new Vue ({
           }
         })
         .then((res) => {
-          console.log(res);
-
+          // console.log(res);
+          this.generateStarsRate(res)
           this.manageDataOnPageSwitch(res)
-        });
+        })
+
+
+
+
       }
 
       // gestisco la chiamata se categoria è serie
@@ -200,10 +206,11 @@ const vm = new Vue ({
         })
         .then((res) => {
           console.log(res);
-
+          this.generateStarsRate(res)
           this.manageDataOnPageSwitch(res)
         });
       }
+
     },
 
     switchFollowing: function () {
@@ -223,7 +230,7 @@ const vm = new Vue ({
           })
           .then((res) => {
             console.log(res);
-
+            this.generateStarsRate(res)
             this.manageDataOnPageSwitch(res)
           });
         }
@@ -239,7 +246,7 @@ const vm = new Vue ({
           })
           .then((res) => {
             console.log(res);
-
+            this.generateStarsRate(res)
             this.manageDataOnPageSwitch(res)
           });
         }
@@ -263,7 +270,7 @@ const vm = new Vue ({
           })
           .then((res) => {
             console.log(res);
-
+            this.generateStarsRate(res)
             this.manageDataOnPageSwitch(res)
           });
         }
@@ -279,23 +286,44 @@ const vm = new Vue ({
           })
           .then((res) => {
             console.log(res);
-
+            this.generateStarsRate(res)
             this.manageDataOnPageSwitch(res)
           });
         }
       }
     },
 
-    starRate: function (val) {
-      let rounded = Math.round(val.vote_average / 2)
-      // console.log(rounded);
-      return rounded;
+    generateStarsRate: function (callResult) {
+
+      // gestisce la generazione delle stelle in base al voto
+
+      this.stars = [];
+      callResult.data.results.forEach((e) =>{
+
+        let vote = (e.vote_average / 2);
+        vote = vote.toFixed(1);
+        voteString = vote.toString();
+        let voteArr = voteString.split('.');
+
+        // estraggo il numero di stelle
+        stars = parseInt(voteArr[0]);
+
+        // estraggo la mezza stella (gli assegno valore 1 se presente o valore 0 se non presente)
+        halfStar =  parseInt(voteArr[1]);
+        if (halfStar >= 5) {
+          halfStar = 1;
+        } else {
+          halfStar = 0;
+        }
+        // popolo l'array a cui farà riferimento ogni scheda per generare le rispettive stelle
+        this.stars.push({stars: stars, halfStar: halfStar });
+      })
     },
 
     flag: function (filmObj) {
 
       // gestisce la bandiera della lingua (se presente)
-      let match = ''
+      let match = 'notFound'
       this.flags.forEach(e => {
         if (filmObj.original_language == e.lang) {
           match = e.src;
@@ -303,6 +331,8 @@ const vm = new Vue ({
       })
       return match;
     },
+
+
 
   }
 })
