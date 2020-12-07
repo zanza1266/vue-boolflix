@@ -5,10 +5,13 @@
 const vm = new Vue ({
   el: '#root',
   data: {
+    genres: [],
+    show: true,
     category: 'film',
     currentCategory: '',
     userSearch: '',
     actualSearch: '',
+    noResultsFounded: false,
     filmsInPage: [],
     flags: [
       {
@@ -63,7 +66,21 @@ const vm = new Vue ({
     arrayOfTotPages: [],
     displayedNav: [],
     selectedPage: null,
-    stars: []
+    stars: [],
+    showCast: [],
+    id:'',
+    castVisibility: false
+  },
+  mounted: function () {
+    axios.get('https://api.themoviedb.org/3/genre/movie/list', {
+      params: {
+        api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+      }
+    })
+    .then((res) =>{
+      console.log(res);
+      this.genres = [...res.data.genres]
+    })
   },
   methods: {
 
@@ -73,48 +90,56 @@ const vm = new Vue ({
       let searched = this.userSearch;
       this.actualSearch = searched;
 
-      // replico l'operazione fatta con 'data.userSearch' per salvare 'data.category'.
-      let selectedCategory = this.category;
-      this.currentCategory = selectedCategory;
+      if (this.actualSearch != '') {
+        // replico l'operazione fatta con 'data.userSearch' per salvare 'data.category'.
+        let selectedCategory = this.category;
+        this.currentCategory = selectedCategory;
 
+        // inizializzo la pagina da visualizzare ad 1 prima che si avvii la chiamata.
+        this.selectedPage = 1
 
-      // inizializzo la pagina da visualizzare ad 1 prima che si avvii la chiamata.
-      this.selectedPage = 1
+        // gestisco la chiamata se categoria è film
+        if (this.currentCategory == 'film') {
+          axios.get('https://api.themoviedb.org/3/search/movie', {
+            params: {
+              api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+              query: this.userSearch,
+              page: 1
+            }
+          })
+          .then((res) => {
+            console.log(res);
 
-      // gestisco la chiamata se categoria è film
-      if (this.currentCategory == 'film') {
-        axios.get('https://api.themoviedb.org/3/search/movie', {
-          params: {
-            api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
-            query: this.userSearch,
-            page: 1
-          }
-        })
-        .then((res) => {
-          console.log(res);
-          this.generateStarsRate(res)
-          this.manageDataOnSearch(res)
-        });
+            this.generateStarsRate(res)
+            this.manageDataOnSearch(res)
+          });
+        }
+        // gestisco la chiamata se categoria è serie
+        if (this.currentCategory == 'serie') {
+          axios.get('https://api.themoviedb.org/3/search/tv', {
+            params: {
+              api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
+              query: this.userSearch,
+              page: 1
+            }
+          })
+          .then((res) => {
+            console.log(res);
+            this.generateStarsRate(res)
+            this.manageDataOnSearch(res)
+          })
+        }
       }
-      // gestisco la chiamata se categoria è serie
-      if (this.currentCategory == 'serie') {
-        axios.get('https://api.themoviedb.org/3/search/tv', {
-          params: {
-            api_key: 'cfbf97edc4875500dc2f4461f936f5f6',
-            query: this.userSearch,
-            page: 1
-          }
-        })
-        .then((res) => {
-          console.log(res);
-          this.generateStarsRate(res)
-          this.manageDataOnSearch(res)
-        })
-      }
-
     },
 
     manageDataOnSearch: function (callResult) {
+
+      // stampo messaggio nel caso in cui la ricerca non abbia trovato risultati
+      if (callResult.data.total_results == 0) {
+        this.noResultsFounded = true;
+      } else if (callResult.data.total_results > 0) {
+        this.noResultsFounded = false;
+      }
 
       // popolo l'array di film da visualizzare nella pagina selezionata
       this.filmsInPage = callResult.data.results
@@ -332,7 +357,72 @@ const vm = new Vue ({
       return match;
     },
 
+    showSearchBar: function () {
+      this.show = false;
+      console.log(this.show);
+    },
 
+    askCast: function (id) {
+      console.log(id);
 
+      // gestisce la visualizzazione del cast nella scheda del film
+      this.id = id
+      this.castVisibility = !this.castVisibility
+      this.showCast = [];
+
+      axios.get(`https://api.themoviedb.org/3/movie/${id}/credits`, {
+        params: {
+          api_key: 'cfbf97edc4875500dc2f4461f936f5f6'
+        }
+      })
+      .catch((error) =>{
+        console.log(error.response);
+        if (error.response.status == 404) {
+          this.showCast.push('non disponibile')
+        }
+      })
+      .then((res) =>{
+
+        if (res.data.cast.length == 0) {
+          this.showCast.push('non disponibile')
+        } else {
+          res.data.cast.forEach((e, index) =>{
+
+            if (index < 5) {
+              // console.log(e.name)
+              this.showCast.push(e.name)
+            }
+          })
+        }
+      })
+
+    },
+
+    mouseleave: function () {
+      this.castVisibility = false
+    },
+
+    matchGenres: function (gen) {
+
+      // gestisce l'assegnazione dei generi ad ogni scheda film
+      console.log(gen);
+
+      let genresString = '';
+
+      if (gen.length == 0) {
+        return 'Non disponibile'
+      } else {
+        gen.forEach((e) =>{
+          this.genres.forEach((el) => {
+            if (e == el.id) {
+              genresString += `${el.name}, `
+            }
+          })
+        })
+      }
+      let fixedString = genresString.substring(0,genresString.length-2);
+
+      return fixedString;
+    }
   }
 })

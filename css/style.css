@@ -50,6 +50,10 @@ body {
   display: none;
 }
 
+.displayBlock {
+  display: block;
+}
+
 .yellow {
   color: yellow;
 }
@@ -81,6 +85,10 @@ body {
 .label {
   margin: 20px 0px 10px 0px;
   font-size: 15px;
+}
+
+.mg-r-50 {
+  margin-right: 50px;
 }
 
 .text-center {
@@ -115,11 +123,40 @@ header {
   background-color: #1b1b1b;
 }
 
-.search-header input {
-  border-radius: 10px;
-  border-style: none;
-  padding: 0 10px;
+.search-bar {
+  height: 0px;
+  position: relative;
+  transition: height .5s;
 }
+
+.h30 {
+  height: 30px;
+}
+
+.search-bar span {
+  color: white;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translate(0%, -50%);
+}
+
+.search-header {
+  height: 30px;
+}
+
+.search-header input {
+  width: 200px;
+  height: 100%;
+  border-style: none;
+  padding: 0 30px 0 10px;
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+}
+
+
+
 
 .logo img {
   width: 120px;
@@ -192,6 +229,15 @@ header {
 
 .film-info .flag {
   width: 25px;
+}
+
+.cast {
+  padding-top: 10px;
+}
+
+.cast li {
+  list-style: none;
+  font-size: 12px;
 }
 
 .film-info p {

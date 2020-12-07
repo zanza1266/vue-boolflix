@@ -38,15 +38,24 @@
           <img src="img/logo2.png" alt="">
         </div>
 
-        <div class="search-header flex-row jfy-between">
+        <div class="search-header flex-row jfy-between alg-center">
           <span class="f-size-12">seleziona una categoria</span>
           <select class="mg-lt-10" v-model="category">
             <option value="film">Film</option>
             <option value="serie">Serie TV</option>
           </select>
 
-          <input class="mg-lt-20" type="text" placeholder="Cerca" v-model="userSearch">
-          <button class="mg-lt-20" @click="search"><i class="fas fa-search"></i></button>
+          <div class="search-bar mg-lt-20 flex-col jfy-center" :class="{h30 : !show}">
+            <input :class="{displayNone : show}" type="text" placeholder="Cerca" v-model="userSearch">
+            <span @click="search" :class="{displayNone : show}"><i class="fas fa-search"></i></span>
+
+            <div :class="{displayNone: !show}" class="mg-r-50">
+              <i class="fas fa-search" @click="showSearchBar"></i>
+            </div>
+
+          </div>
+
+
         </div>
 
       </header>
@@ -54,7 +63,9 @@
       <div class="container">
 
         <div class="cards-container flex-row wrap">
-          <div class="my-card" v-for="(film, index) in filmsInPage">
+
+          <span v-if="noResultsFounded" class="no-results">Nessun risultato trovato per "{{actualSearch}}"</span>
+          <div v-else class="my-card" v-for="(film, index) in filmsInPage">
 
             <div class="poster">
               <!-- da mostrare se poster non presente -->
@@ -67,7 +78,7 @@
               <img v-else :src="`https://image.tmdb.org/t/p/original/${film.poster_path}`" alt="poster">
             </div>
 
-            <div class="flex-col film-info">
+            <div v-on:mouseleave="mouseleave" class="flex-col film-info">
               <!-- titolo -->
               <h1 v-if="currentCategory == 'film'">{{film.title}}</h1>
               <h1 v-else>{{film.name}}</h1>
@@ -104,10 +115,25 @@
                 </span>
 
               </div>
+              <!-- cast -->
+              <div class="cast">
+                <span @click.stop="askCast(film.id)">Vedi attori
+                  <i v-if="castVisibility == false" class="fas fa-chevron-right"></i>
+                  <i v-else class="fas fa-chevron-down"></i>
+                </span>
+
+                <ul v-show="film.id == id && castVisibility == true">
+                  <li v-if="showCast[0] == 'non disponibile'">({{showCast[0]}})</li>
+                  <li v-else v-for="name in showCast">{{name}}</li>
+                </ul>
+              </div>
               <!-- overview -->
               <span class="label">Overview:</span>
               <p v-if="film.overview == ''">(Overview not available)</p>
               <p v-else>{{film.overview}}</p>
+              <!-- genere -->
+              <span class="label">Genere:</span>
+              <p>({{matchGenres(film.genre_ids)}})</p>
             </div>
 
           </div>
@@ -115,11 +141,15 @@
 
         <div class="pagination-row flex-row alg-center jfy-center">
           <div class="pagination">
-            <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchPrevious">&laquo;</a>
+            <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchPrevious">
+              <i class="fas fa-chevron-left"></i>
+            </a>
 
             <a href="#" v-for="(number, index) in displayedNav" :class="{active: number.pos == selectedPage}" @click="changePage(number, index)">{{number.pos}}</a>
 
-            <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchFollowing">&raquo;</a>
+            <a href="#" :class="{displayNone : filmsInPage.length == 0}" @click="switchFollowing">
+              <i class="fas fa-chevron-right"></i>
+            </a>
           </div>
         </div>
 
