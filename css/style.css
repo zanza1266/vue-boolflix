@@ -91,6 +91,15 @@ body {
   margin-right: 50px;
 }
 
+.bold {
+  font-weight: bold;
+  color: red;
+}
+
+.mg-r-15 {
+  margin-right: 15px;
+}
+
 .text-center {
   text-align: center;
 }
@@ -115,6 +124,27 @@ header {
 .search-header {
   height: 20px;
   color: white;
+}
+
+.genres-container {
+  position: relative;
+}
+
+.genres-list {
+  position: absolute;
+  top: 30px;
+  right: 0px;
+  width: 150px;
+  padding: 10px;
+  background-color: #1b1b1b;
+  z-index: 1;
+
+}
+
+.genres-list li {
+  list-style: none;
+  color: white;
+  margin: 5px 0px;
 }
 
 .search-header button {
@@ -154,9 +184,6 @@ header {
   border: 1px solid white;
   color: white;
 }
-
-
-
 
 .logo img {
   width: 120px;
@@ -267,6 +294,16 @@ header {
 .pagination a:hover:not(.active) {background-color: #ddd;}
 
 /* HOVERS */
+
+.search-header span:hover {
+  cursor: pointer;
+  color: red;
+}
+
+.genres-list li:hover {
+  cursor: pointer;
+  color: red;
+}
 
 .my-card:hover .film-info {
   visibility: visible;

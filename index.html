@@ -39,11 +39,24 @@
         </div>
 
         <div class="search-header flex-row jfy-between alg-center">
-          <span class="f-size-12">seleziona una categoria</span>
-          <select class="mg-lt-10" v-model="category">
-            <option value="film">Film</option>
-            <option value="serie">Serie TV</option>
-          </select>
+          <p class="f-size-12 mg-r-15">seleziona una categoria</p>
+
+          <span class="f-size-15 mg-r-15" :class="{bold: category == 'film'}" @click="category = 'film'">Film</span>
+
+          <span class="f-size-15 mg-r-50"  @click="category = 'serie'" :class="{bold: category == 'serie'}">Serie TV</span>
+
+          <div class="genres-container flex-row alg-center" v-on:mouseover="showGenres = false">
+            <span class="f-size-12 genres">Genere:</span>
+            <p class="f-size-12 mg-lt-10 bold">{{genreNameSelected}}</p>
+
+            <div class="genres-list" :class="{displayNone: showGenres}" v-on:mouseleave="showGenres = true">
+              <ul>
+
+                <li v-for="genre in genres" @click="selectGenre(genre.id, genre.name)">{{genre.name}}</li>
+              </ul>
+            </div>
+          </div>
+
 
           <div class="search-bar mg-lt-20 flex-col jfy-center" :class="{h30 : !show}">
             <input :class="{displayNone : show}" type="text" placeholder="Cerca" v-model="userSearch">

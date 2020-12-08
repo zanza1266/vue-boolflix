@@ -1,5 +1,7 @@
 // cfbf97edc4875500dc2f4461f936f5f6
 
+// sistemare opzione 'all' nella scelta del genere, e attivazione filtro alla selezione del genere, creare una copia dei film caricati a cui fare riferimentp
+
 
 
 const vm = new Vue ({
@@ -13,6 +15,7 @@ const vm = new Vue ({
     actualSearch: '',
     noResultsFounded: false,
     filmsInPage: [],
+    filmsInPageCopy: [],
     flags: [
       {
         src: 'img/flags/china.svg',
@@ -69,7 +72,10 @@ const vm = new Vue ({
     stars: [],
     showCast: [],
     id:'',
-    castVisibility: false
+    castVisibility: false,
+    showGenres: true,
+    selectedGenre: 'all',
+    genreNameSelected: 'all'
   },
   mounted: function () {
     axios.get('https://api.themoviedb.org/3/genre/movie/list', {
@@ -79,9 +85,10 @@ const vm = new Vue ({
     })
     .then((res) =>{
       console.log(res);
-      this.genres = [...res.data.genres]
+      this.genres = [...res.data.genres, {id: 'all', name: 'All'}]
     })
   },
+
   methods: {
 
     search: function () {
@@ -142,7 +149,14 @@ const vm = new Vue ({
       }
 
       // popolo l'array di film da visualizzare nella pagina selezionata
+
       this.filmsInPage = callResult.data.results
+
+      // creo una copia dei film da visualizzare nella pagina, utile per avere un riferimento statico quando viene utilizzato il filtro per genere (la funzione di filtraggio itererà quindi sempre sulla lista completa dei film, cosi da restituire un nuovo array filtrato ogni volta che viene cambiato il genere nella tendina)
+      this.filmsInPageCopy = callResult.data.results
+
+      // filtro per genere selezionato
+      this.filterPerGen();
 
       // svuoto array delle pagine totali della ricerca e l'array delle pagine selezionabili nella navigation bar (funzionale principalmente in caso di nuova ricerca)
       this.arrayOfTotPages = [];
@@ -165,6 +179,12 @@ const vm = new Vue ({
 
       // popolo l'array di film da visualizzare nella pagina selezionata
       this.filmsInPage = callResult.data.results
+
+      // creo una copia dei film da visualizzare nella pagina, utile per avere un riferimento statico quando viene utilizzato il filtro per genere (la funzione di filtraggio itererà quindi sempre sulla lista completa dei film, cosi da restituire un nuovo array filtrato ogni volta che viene cambiato il genere nella tendina)
+      this.filmsInPageCopy = callResult.data.results
+
+      // filtro per genere selezionato
+      this.filterPerGen();
 
       // svuoto array delle pagine totali della ricerca e l'array delle pagine selezionabili nella navigation bar (funzionale principalmente in caso di nuova ricerca)
       this.arrayOfTotPages = [];
@@ -359,7 +379,7 @@ const vm = new Vue ({
 
     showSearchBar: function () {
       this.show = false;
-      console.log(this.show);
+      // console.log(this.show);
     },
 
     askCast: function (id) {
@@ -405,7 +425,7 @@ const vm = new Vue ({
     matchGenres: function (gen) {
 
       // gestisce l'assegnazione dei generi ad ogni scheda film
-      console.log(gen);
+      // console.log(gen);
 
       let genresString = '';
 
@@ -423,6 +443,48 @@ const vm = new Vue ({
       let fixedString = genresString.substring(0,genresString.length-2);
 
       return fixedString;
+    },
+
+    selectGenre: function (idNum, name) {
+
+      // salvo in data l'id del genere selezionato
+      this.selectedGenre = idNum
+      this.genreNameSelected = name;
+      this.showGenres = true;
+
+      if (this.filmsInPageCopy.length > 0) {
+        // aggiorno la visualizzazione per genere
+        this.filterPerGen()
+      }
+
+
+    },
+
+    filterPerGen: function () {
+
+      // filtro i film alla scelta del genere (non filtro, o restituisco la copia non filtrata dei film, se l'utente seleziona 'all')
+      if (this.selectedGenre != 'all') {
+        let filteredArr = [];
+
+        this.filmsInPageCopy.forEach((e) => {
+
+          e.genre_ids.forEach((id) => {
+            if (id == this.selectedGenre) {
+              filteredArr.push(e);
+            }
+          })
+        })
+
+        console.log(filteredArr);
+        this.filmsInPage = [...filteredArr];
+      } else {
+        this.filmsInPage = [...this.filmsInPageCopy]
+      }
+    },
+
+    ciao: function (a) {
+      console.log(a);
     }
+
   }
 })
