@@ -481,10 +481,5 @@ const vm = new Vue ({
         this.filmsInPage = [...this.filmsInPageCopy]
       }
     },
-
-    ciao: function (a) {
-      console.log(a);
-    }
-
   }
 })
