@@ -1,8 +1,5 @@
 // cfbf97edc4875500dc2f4461f936f5f6
 
-// sistemare opzione 'all' nella scelta del genere, e attivazione filtro alla selezione del genere, creare una copia dei film caricati a cui fare riferimentp
-
-
 
 const vm = new Vue ({
   el: '#root',

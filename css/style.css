@@ -238,9 +238,10 @@ header {
 
 .film-info {
   visibility: hidden;
-  padding: 10px;
+  padding: 40px;
   color: white;
   overflow: auto;
+  scrollbar-width: none;
 }
 
 .film-info h1 {
